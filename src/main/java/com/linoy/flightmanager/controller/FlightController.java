@@ -2,10 +2,11 @@ package com.linoy.flightmanager.controller;
 
 import com.linoy.flightmanager.model.Flight;
 import com.linoy.flightmanager.repository.FlightRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin(origins = "http://localhost:5174")
 @RestController
 @RequestMapping("/api/flights")
 public class FlightController {
@@ -22,8 +23,10 @@ public class FlightController {
     }
 
     @GetMapping("/{id}")
-    public Flight getFlightById(@PathVariable Long id) {
-        return flightRepository.findById(id).orElseThrow();
+    public ResponseEntity<Flight> getFlightById(@PathVariable Long id) {
+        return flightRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -31,29 +34,46 @@ public class FlightController {
         return flightRepository.save(flight);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteFlight(@PathVariable Long id) {
-        flightRepository.deleteById(id);
+    @PutMapping("/{id}")
+    public ResponseEntity<Flight> updateFlight(@PathVariable Long id, @RequestBody Flight updatedFlight) {
+        return flightRepository.findById(id)
+                .map(flight -> {
+                    flight.setFlightCode(updatedFlight.getFlightCode());
+                    flight.setCancelled(updatedFlight.isCancelled());
+                    flight.setPrice(updatedFlight.getPrice());
+                    flight.setDepartureTime(updatedFlight.getDepartureTime());
+                    flight.setLandingTime(updatedFlight.getLandingTime());
+                    flight.setDestination(updatedFlight.getDestination());
+
+                    Flight savedFlight = flightRepository.save(flight);
+                    return ResponseEntity.ok(savedFlight);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}/cancel")
-    public Flight cancelFlight(@PathVariable Long id) {
-        Flight flight = flightRepository.findById(id).orElseThrow();
-        flight.cancelFlight();
-        return flightRepository.save(flight);
+    public ResponseEntity<Flight> cancelFlight(@PathVariable Long id) {
+        return flightRepository.findById(id)
+                .map(flight -> {
+                    flight.cancelFlight();
+                    Flight savedFlight = flightRepository.save(flight);
+                    return ResponseEntity.ok(savedFlight);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-public Flight updateFlight(@PathVariable Long id, @RequestBody Flight updatedFlight) {
-    Flight flight = flightRepository.findById(id).orElseThrow();
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFlight(@PathVariable Long id) {
+        if (!flightRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
 
-    flight.setFlightCode(updatedFlight.getFlightCode());
-    flight.setCancelled(updatedFlight.isCancelled());
-    flight.setPrice(updatedFlight.getPrice());
-    flight.setDepartureTime(updatedFlight.getDepartureTime());
-    flight.setLandingTime(updatedFlight.getLandingTime());
-    flight.setDestination(updatedFlight.getDestination());
+        flightRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 
-    return flightRepository.save(flight);
-}
+    @GetMapping("/search")
+    public List<Flight> searchFlightsByDestination(@RequestParam String destination) {
+    return flightRepository.findByDestinationIgnoreCase(destination);
+    }
 }
