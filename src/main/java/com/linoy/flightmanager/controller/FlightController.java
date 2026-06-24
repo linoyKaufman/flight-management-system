@@ -11,11 +11,10 @@ public class FlightController {
 
     @GetMapping("/api/flights")
     public List<Flight> getFlights() {
-
         return List.of(
-                new Flight(1L, "Paris", 350),
-                new Flight(2L, "London", 280),
-                new Flight(3L, "Rome", 420)
+                new Flight("LY001", false, 350, 900, 1200, "Paris"),
+                new Flight("BA202", false, 280, 1030, 1430, "London"),
+                new Flight("AZ303", false, 420, 700, 1030, "Rome")
         );
     }
 }
