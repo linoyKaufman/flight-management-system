@@ -21,8 +21,25 @@ public class FlightController {
         return flightRepository.findAll();
     }
 
+    @GetMapping("/{id}")
+    public Flight getFlightById(@PathVariable Long id) {
+        return flightRepository.findById(id).orElseThrow();
+    }
+
     @PostMapping
     public Flight createFlight(@RequestBody Flight flight) {
+        return flightRepository.save(flight);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteFlight(@PathVariable Long id) {
+        flightRepository.deleteById(id);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public Flight cancelFlight(@PathVariable Long id) {
+        Flight flight = flightRepository.findById(id).orElseThrow();
+        flight.cancelFlight();
         return flightRepository.save(flight);
     }
 }
