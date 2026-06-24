@@ -42,4 +42,18 @@ public class FlightController {
         flight.cancelFlight();
         return flightRepository.save(flight);
     }
+
+    @PutMapping("/{id}")
+public Flight updateFlight(@PathVariable Long id, @RequestBody Flight updatedFlight) {
+    Flight flight = flightRepository.findById(id).orElseThrow();
+
+    flight.setFlightCode(updatedFlight.getFlightCode());
+    flight.setCancelled(updatedFlight.isCancelled());
+    flight.setPrice(updatedFlight.getPrice());
+    flight.setDepartureTime(updatedFlight.getDepartureTime());
+    flight.setLandingTime(updatedFlight.getLandingTime());
+    flight.setDestination(updatedFlight.getDestination());
+
+    return flightRepository.save(flight);
+}
 }

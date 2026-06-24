@@ -80,9 +80,7 @@ public class Flight {
     }
 
     public void setDepartureTime(int departureTime) {
-        int delay = departureTime - this.departureTime;
-        this.landingTime = this.landingTime + delay;
-        this.departureTime = departureTime;
+    this.departureTime = departureTime;
     }
 
     public void setLandingTime(int landingTime) {
